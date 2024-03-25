@@ -1,195 +1,194 @@
-<style>
-html, body{
-	position: absolute;
-	margin-left: 0;
-}
+<script lang="ts">
+  import basicScore from './score/score-basic';  
+  import { convertAbcNotation, notePitchAbcParse } from '$lib/noteDictionary';
+  import Tuner from '$lib/tuner-module/tuner.js';
+  import { getByteFrequencyData } from '$lib/tuner-module/config';
 
-/* ========== FONTS ========== */
+  import 'abcjs/abcjs-audio.css';
+  import './score/index.css';
+	import { onMount } from 'svelte'
 
-@font-face { font-family: 'Opus_Std';        src: url('../fonts/Opus/Opus.otf');  				}
-@font-face { font-family: 'Opus_Metronome';  src: url('../fonts/Opus/Opus Metronome.otf');  	}
-@font-face { font-family: 'Opus_Chords';     src: url('../fonts/Opus/Opus Chords Sans.otf');  	}
-@font-face { font-family: 'Opus_Text';       src: url('../fonts/Opus/Opus Text.otf');  			}
-@font-face { font-family: 'Opus_Note_Names'; src: url('../fonts/Opus/Opus Note Names.otf');  	}
-@font-face { font-family: 'Opus_Special';    src: url('../fonts/Opus/Opus Special.otf');  		}
+  let abcjs = null;
+  let scoreAbcJS = null;
+  let tuner = null;
+  let tooltipStyle='';
 
-/* ========== Staff ========== */
-#svgStaff {
-	box-sizing: border-box;
-	min-height:100%;
-	max-width: 100%;
-	height: -webkit-fill-available;
-	cursor:pointer !important;
-}
 
-.noteGroup path, .noteGroup g,.noteGroup{
-	pointer-events: none;
-}
+  const CLASSNAME_CURRENT_NOTE = 'abcjs-note_selected';
+  const CLASSNAME_CORRECT_NOTE = 'abcjs-note_correct';
+  const CLASSNAME_NOTES = 'abcjs-note';
+  const CLASSNAME_NOTE_HEAD = 'abcjs-notehead';
+  const CLASSNAME_TOOLTIP = 'tooltip';
 
-.note{
-	font-size: 110px;
-	font-family: 'Opus_Note_Names';
-}
-
-.noteGroup text{
-	font-size: 110px;
-}
-
-#quarterFlat{
-	font-family:'Opus_Special';
-}
-
-.noteText{
-	font-family: 'Opus_Chords' !important;
-	font-size: 25px;
-}
-
-.flat, .sharp{
-	font-family: 'Opus_Std';
-	font-size: 120px;
-}
-
-#clefs rect {
-	stroke:transparent;
-	fill:transparent;
-	cursor:pointer;
-}
-
-#clefs text {
-	font-family: 'Opus_Std';
-	font-size: 100px;
-	pointer-events:none;
-}
-
-.l1{
-	stroke-width: 6.1px;
-	opacity:0;
-}
-
-.l2{
-	stroke-width: 9.3px;
-	opacity:0;
-}
-
-.ledgerLines path{
-	stroke-width: 6.1px;
-	pointer-events: none;
-	stroke:black;
-	display:none;
-}
-
-.l1,.l2,.ledgerLines path{
-	stroke:#000;
-	fill:#000;
-}
-
-.TrebleClef,.AltoClef,.BassClef,#NoteHead,.sharp,.flat,.notehead,.sharp,.flat{
-	fill:#000;
-	stroke:black;
-	stroke-width: 2px;
-}
-
-#myStaff {
-	height: 100%;
-	max-height: min(100%,100vw);
-	position:absolute;
-	left: 50%;
-	top: 50%;
-	transform: translateX(-50%) translateY(-50%);
-}
-
-.staff {
-	height: max(100%, 100vh);
-	width: 100vw;
-	position: absolute;
-	top: 0;
-	left: 0;
-}
-
-svg {
-	user-select: none;
-}
-
-h1 {
-	text-align: center;
-	font: max(40px,min(80px,5vh)) Helvetica;
-	font-weight: 100;
-	position: absolute;
-	width: 100%;
-	text-decoration: none;
-	color: black;
-	white-space:nowrap;
-	top:0;
-	margin-top:2vh
-}
-
-.button {
-	font:  max(25px,min(2vh,3em)) Helvetica;
-	text-decoration: none;
-	background-color: #EEEEEE;
-	color: #333333;
-	padding: 2px 6px 2px 6px;
-	border: 2px solid #CCCCCC;
-	/*border-right: 1px solid #CCCCCC;
-	border-bottom: 1px solid #CCCCCC;
-	border-left: 1px solid #CCCCCC;*/
-	border-radius:10px;
-	right: 2em;
-	top: 2em;
-	cursor:pointer;
-}
-
-.button:hover{
- background-color: #8f8f8f;
- color:white
-}
-header{
-	cursor:default;
-	z-index: 2;
-	position:fixed;
-	width:100vw;
-	padding-left: 0.5em;
-}
-
-</style>
-    
-<script>
-import { onMount } from 'svelte';
-let StaffComp;
-import "@instrumentbible/staff.js/js/JZZ.js";
-import "@instrumentbible/staff.js/js/JZZ.input.Kbd.js";
-
-onMount(async () => {
-    const module = await import("../lib/staff");
-    let Staff = module.default;
-    console.info(Staff)
-
-    
-
-    // these are the options
-    var options = {
-        id: "myStaff",
-        clef: "treble",
-        accidental: "flat",
-        color: "#FF0000",
-        scroll: false,
+  type NoteScore = {
+      abcNotation: string;
+      solfegeNotation: string;
+      domNode: HTMLElement;
     }
 
-    // create a new staff
-    StaffComp = new Staff(options)
-    StaffComp.setNotes([88]);
+  type Score = {
+    currentNotePositon: number;
+    lastNotePosition: number;
+    notes: NoteScore[];  
+  };  
+  
+  let score:Score = {
+    currentNotePositon: 0,
+    lastNotePosition: 0,
+    notes: []
+  }
 
-});
+  const configureAbcJS = async () => {
+    abcjs = await import("abcjs");
+
+    scoreAbcJS = abcjs.renderAbc("paper", basicScore, {
+      add_classes: true,
+      clickListener: onUserInteractWithNote
+    });
+    return;
+  }
+
+  const configureTuner = async () => {
+    const notation = "abc";
+    const a4 = getByteFrequencyData();
+    tuner = new Tuner({
+      a4,
+      notation,
+      onNoteDetected
+    });
+  }
+
+  const onUserInteractWithNote = (note) => {
+    if(note.el_type !== 'note') {
+      return;
+    }
+
+    deselectNote(getCurrentNote());
+    selectNote(getCurrentDomNode().getAttribute('data-index'))
+  }
+
+  const onNoteDetected = (note: NoteScore) => {
+    const abcNote = getCurrentNodeAbcNotation();
+    console.info('note', note)
+
+    if (abcNote === note.nameNotation) {
+      score.lastNotePosition = score.currentNotePositon;
+      markNoteAsCorrect(getNoteIndex(score.lastNotePosition));
+      score.currentNotePositon = ++score.currentNotePositon;
+      const currentNote = getNoteIndex(score.currentNotePositon);
+      selectNote(currentNote);
+      updateNoteTooltip(currentNote);
+    }
+  }
+
+  const start = () => {
+    tuner.init();
+  }
+
+  const getCurrentNote = (): NoteScore => {
+    return score.notes[score.currentNotePositon];
+  }
+
+  const getNoteIndex = (index:number) => {
+    return score.notes[index];
+  }
+
+  const getElementOffset = (el) => {
+    const rect = el.getBoundingClientRect();
+    return {
+      left: rect.left + window.scrollX,
+      top: rect.top + window.scrollY
+    };
+  }
+
+  const getCurrentDomNode = (): HTMLElement => {
+    return document.getElementsByClassName(CLASSNAME_CURRENT_NOTE)[0]
+  }
+
+  const markNoteAsCorrect = (note:NoteScore) => {
+    if(!note) {
+      return null;
+    }
+    const domNode = Array.isArray(note.domNode) ? note.domNode[0] : note.domNode;
+    domNode.classList.add(CLASSNAME_CORRECT_NOTE);
+  }
+
+  const getCurrentNodeAbcNotation = (): string => {
+    return notePitchAbcParse[getCurrentNote().abcNotation];
+  }
+
+  const deselectNote = (note: NoteScore) => {
+    note.domNode.classList.remove(CLASSNAME_CURRENT_NOTE);
+  }
+
+  const updateNoteVisual = (note:NoteScore) => {
+    note.domNode.classList.add(CLASSNAME_CURRENT_NOTE);
+  }
+
+  const updateNoteTooltip = (note:NoteScore) => {
+    const tooltipEl = document.getElementsByClassName(CLASSNAME_TOOLTIP)[0];
+    const tooltipBoundingBox = tooltipEl.getBoundingClientRect()
+
+    const paddingLeft = tooltipEl.style.paddingLeft;
+    const paddingRight = tooltipEl.style.paddingRight;
+    const compensation = parseInt( paddingLeft, 10 ) + parseInt( paddingRight, 10 );
+
+    console.info('tooltipEl.style', tooltipEl.style)
+
+    console.info('>', paddingLeft)
+    const offsetLeftCompensantion = (
+      tooltipBoundingBox.width = (tooltipBoundingBox.width/2) - compensation
+    );
+
+    const offset = getElementOffset(note.domNode)
+    const x = offset.top - 50;
+    const y = offset.left - 5//offsetLeftCompensantion;
 
 
+    tooltipStyle = `top: ${x}px; left: ${y}px; position: absolute; background-color: #f9f9f9; border: 1px solid #000; padding: 5px;`
+  }
+
+  const selectNote = (note:NoteScore) => {
+    deselectNote(getNoteIndex(score.lastNotePosition))
+    updateNoteVisual(note)
+  }
+
+  const prepareScoreNotes = () => {
+    const notes = document.getElementsByClassName(CLASSNAME_NOTES);
+
+    for (let i = 0; i < notes.length; i++) {
+      const noteDataName = notes[i].getElementsByClassName(CLASSNAME_NOTE_HEAD)[0].getAttribute('data-name')
+      const scoreNote = noteDataName ? noteDataName : "";
+      score.notes[i] = {
+        domNode: notes[i] as HTMLElement,
+        abcNotation: scoreNote,
+        solfegeNotation: convertAbcNotation(scoreNote)
+      }
+    }
+  }
+
+  const configureScore = async () => {
+    await prepareScoreNotes();
+    updateNoteVisual(getCurrentNote())
+  }
+
+  onMount(async () => {
+    await configureAbcJS();
+    await configureTuner();
+    await configureScore();
+    await updateNoteTooltip(getCurrentNote());
+	})
 
 </script>
 
+<div id="paper"></div>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<div class={CLASSNAME_TOOLTIP} style={tooltipStyle}>{score.notes[score.currentNotePositon] && (
+  score.notes[score.currentNotePositon].solfegeNotation
+)}</div>
 
-<div id="myStaff" class="staff"></div>
+<div>
+  Partitura: {score.notes[score.currentNotePositon] && getCurrentNodeAbcNotation()}
+</div>
 
-
-
+<button on:click={start}>Start</button>

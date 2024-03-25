@@ -45,13 +45,9 @@
 	"dependencies": {
 		"@instrumentbible/staff.js": "^1.0.1",
 		"abcjs": "^6.3.0",
-		"aubiojs": "^0.2.1",
 		"lodash.throttle": "^4.1.1",
 		"pitchy": "^4.1.0",
 		"sweetalert2": "^11.10.7",
-		"tone": "^14.8.49",
-		"vite-plugin-mkcert": "^1.10.1",
-		"vite-plugin-top-level-await": "^1.4.1",
-		"vite-plugin-wasm": "^3.3.0"
+		"vite-plugin-mkcert": "^1.10.1"
 	}
 }
