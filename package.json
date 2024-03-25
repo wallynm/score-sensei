@@ -44,6 +44,7 @@
 	"type": "module",
 	"dependencies": {
 		"@instrumentbible/staff.js": "^1.0.1",
+		"@sveltejs/adapter-static": "^3.0.1",
 		"abcjs": "^6.3.0",
 		"lodash.throttle": "^4.1.1",
 		"pitchy": "^4.1.0",
