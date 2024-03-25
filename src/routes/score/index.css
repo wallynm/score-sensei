@@ -1,0 +1,67 @@
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    gap: 20px;
+    place-content: center;
+    text-align: center;
+    background: #f2f2f2;
+  }
+
+
+.abcjs-note_selected {
+    fill: red;
+}
+
+.abcjs-note_correct {
+    fill: green;
+}
+
+
+
+
+
+
+.tooltip {
+    /* triangle dimension */
+    --b: 1em; /* base */
+    --h: 0.5em; /* height */
+  
+    --p: 50%; /* position */
+    --r: 0.3em; /* the radius */
+  
+    border-radius: var(--r) var(--r) min(var(--r),100% - var(--p) - var(--b)/2) min(var(--r),var(--p) - var(--b)/2)/var(--r);
+    background: 0 0/100% calc(100% + var(--h)) 
+      linear-gradient(60deg,#646464,#333); /* the gradient */
+    position: absolute;
+    z-index: 0;
+    /* opacity: 0; */
+  }
+
+  .tooltip.tooltip-show {
+    z-index: 1;
+    opacity: 1;
+  }
+  .tooltip:before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 calc(-1*var(--h));
+    background-image: inherit;
+    clip-path: 
+      polygon(50% 50%,
+        min(100%,var(--p) + var(--b)/2) 
+        calc(100% - var(--h)),var(--p) 100%,
+        max(0%,var(--p) - var(--b)/2) calc(100% - var(--h)));
+  }
+  
+
+  .tooltip {
+    color: #fff;
+    font-size:12px;
+    font-weight: 500;
+    font-family: sans-serif;
+    padding: 0.4em;
+    max-width: 25ch;
+  }
