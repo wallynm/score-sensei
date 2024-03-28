@@ -27,7 +27,7 @@ jobs:
 
       - name: build
         env:
-          BASE_PATH: '/'
+          BASE_PATH: '/score-sensei'
         run: |
           npm run build
 
