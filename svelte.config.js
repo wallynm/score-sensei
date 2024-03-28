@@ -18,7 +18,10 @@ const config = {
 		alias: {
 			// this will match a file
 			lib: '/src/lib',
-		}
+		},
+		paths: {
+            base
+        }
 	}
 };
 
