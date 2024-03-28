@@ -1,6 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-const base = process.env.NODE_ENV === 'production' ? 'score-sensei' : '';
+const base = process.env.NODE_ENV === 'production' ? '/score-sensei' : '';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
