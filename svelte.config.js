@@ -12,6 +12,7 @@ const config = {
 		adapter: adapter({
 			fallback: undefined,
 			precompress: true,
+			strict: false
 		}),
 		paths: {
 			base
