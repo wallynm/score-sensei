@@ -10,12 +10,10 @@ const config = {
 
 	kit: {
 		adapter: adapter({
-			fallback: undefined,
-			precompress: true,
-			strict: false
+			fallback: '404.html'
 		}),
 		paths: {
-			base
+			base: process.argv.includes('dev') ? '' : process.env.BASE_PATH
 		}
 	}
 };
