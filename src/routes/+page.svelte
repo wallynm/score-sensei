@@ -1,5 +1,7 @@
 <script lang="ts">
-  import basicScore from './score/score-basic';  
+
+import scoreMusic from './score/concerning-hobbits';
+// import scoreMusic from './score/score-basic';
   import { convertAbcNotation, notePitchAbcParse } from '$lib/noteDictionary';
   import Tuner from '$lib/tuner-module/tuner.js';
   import { getByteFrequencyData } from '$lib/tuner-module/config';
@@ -16,8 +18,9 @@
 
   const CLASSNAME_CURRENT_NOTE = 'abcjs-note_selected';
   const CLASSNAME_CORRECT_NOTE = 'abcjs-note_correct';
-  const CLASSNAME_NOTES = 'abcjs-note';
+  const CLASSNAME_NOTES = '.abcjs-note';
   const CLASSNAME_NOTE_HEAD = 'abcjs-notehead';
+  const CLASSNAME_NOTE_REST = '.abcjs-rest';
   const CLASSNAME_TOOLTIP = 'tooltip';
 
   type NoteScore = {
@@ -29,19 +32,22 @@
   type Score = {
     currentNotePositon: number;
     lastNotePosition: number;
+    selectedNote: NoteScore | null;
     notes: NoteScore[];  
   };  
   
   let score:Score = {
     currentNotePositon: 0,
     lastNotePosition: 0,
+    selectedNote: null,
     notes: []
   }
 
   const configureAbcJS = async () => {
     abcjs = await import("abcjs");
 
-    scoreAbcJS = abcjs.renderAbc("paper", basicScore, {
+    scoreAbcJS = abcjs.renderAbc("paper", scoreMusic, {
+      responsive: "resize",
       add_classes: true,
       clickListener: onUserInteractWithNote
     });
@@ -63,13 +69,18 @@
       return;
     }
 
+    console.info()
     deselectNote(getCurrentNote());
     selectNote(getCurrentDomNode().getAttribute('data-index'))
+    // selectNote(note)
   }
 
   const onNoteDetected = (note: NoteScore) => {
     const abcNote = getCurrentNodeAbcNotation();
     console.info('note', note)
+    if(note.frequency < 160) {
+      return;
+    }
 
     if (abcNote === note.nameNotation) {
       score.lastNotePosition = score.currentNotePositon;
@@ -85,8 +96,13 @@
     tuner.init();
   }
 
+  const getNoteByPosition =(position:number): NoteScore => {
+    console.info(score.notes)
+    return score.notes[position];
+  }
+
   const getCurrentNote = (): NoteScore => {
-    return score.notes[score.currentNotePositon];
+    return getNoteByPosition(score.currentNotePositon);
   }
 
   const getNoteIndex = (index:number) => {
@@ -115,6 +131,11 @@
 
   const getCurrentNodeAbcNotation = (): string => {
     return notePitchAbcParse[getCurrentNote().abcNotation];
+  }
+
+  const getCurrentNodeSolfegeNotation = (notesAhead = 0): string => {
+
+    return getCurrentNote().solfegeNotation
   }
 
   const deselectNote = (note: NoteScore) => {
@@ -149,22 +170,35 @@
   }
 
   const selectNote = (note:NoteScore) => {
+    score.selectedNote = note;
     deselectNote(getNoteIndex(score.lastNotePosition))
     updateNoteVisual(note)
   }
 
   const prepareScoreNotes = () => {
-    const notes = document.getElementsByClassName(CLASSNAME_NOTES);
-
-    for (let i = 0; i < notes.length; i++) {
-      const noteDataName = notes[i].getElementsByClassName(CLASSNAME_NOTE_HEAD)[0].getAttribute('data-name')
+    const notes = document.querySelectorAll(`${CLASSNAME_NOTES},${CLASSNAME_NOTE_REST}`);
+    const notesArray = Array.from(notes);
+    for(let note of notesArray){
+      const i = notesArray.indexOf(note)
+      console.info(i)
+      const noteDataName = note.getElementsByClassName(CLASSNAME_NOTE_HEAD)[0]?.getAttribute('data-name')
       const scoreNote = noteDataName ? noteDataName : "";
       score.notes[i] = {
         domNode: notes[i] as HTMLElement,
         abcNotation: scoreNote,
         solfegeNotation: convertAbcNotation(scoreNote)
       }
-    }
+    };
+
+    // for (let i = 0; i < notes.length; i++) {
+    //   const noteDataName = notes[i].getElementsByClassName(CLASSNAME_NOTE_HEAD)[0].getAttribute('data-name')
+    //   const scoreNote = noteDataName ? noteDataName : "";
+    //   score.notes[i] = {
+    //     domNode: notes[i] as HTMLElement,
+    //     abcNotation: scoreNote,
+    //     solfegeNotation: convertAbcNotation(scoreNote)
+    //   }
+    // }
   }
 
   const configureScore = async () => {
@@ -181,14 +215,25 @@
 
 </script>
 
-<div id="paper"></div>
+<div style="max-width: 800px;      margin: auto;">
+  <div id="paper"></div>
+</div>
 
 <div class={CLASSNAME_TOOLTIP} style={tooltipStyle}>{score.notes[score.currentNotePositon] && (
   score.notes[score.currentNotePositon].solfegeNotation
 )}</div>
 
 <div>
-  Partitura: {score.notes[score.currentNotePositon] && getCurrentNodeAbcNotation()}
+  Partitura: {score.notes[score.currentNotePositon] && getCurrentNodeSolfegeNotation()}
+</div>
+<div>
+  Próxima: {score.notes[score.currentNotePositon] && getNoteByPosition(score.currentNotePositon+1).solfegeNotation }
+</div>
+<div>
+  Selected: {score.selectedNote && JSON.stringify(getNoteByPosition(score.selectedNote)) }
 </div>
 
 <button on:click={start}>Start</button>
+
+
+<!-- d4e4|f4g4|a4b4|c'4d'4d'4|b4a4|g4f4|e4d4|c4B4|A4G4|F4E4|D4C4|B,4A, -->

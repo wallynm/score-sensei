@@ -8,71 +8,109 @@ type NoteDictionary = {
 
 export const noteDictionary: NoteDictionary = {
 'solfege': [
+    // "SOL",
+    // "SOL#",
+    
+    // "LA",
+    // "LA",
+
+    // "SI",
+
     "DO",
-    "DO#",
+    // "DO#",
     "RE",
-    "RE#",
+    // "RE#",
     "MI",
     "FA",
-    "FA#",
+    // "FA#",
     "SOl",
     "SOl#",
     "LA",
     "LA#",
-    "SI"
+    "SI",
+
+    "DO",
+    "DO#",
+
+    "RE",
+    "RE#",
+
+    "MI",
+
+    "FA",
+    "FA#",
+
+    "SOL",
+    "SOL#",
+
+    "LA",
+    "LA#",
+
+    "SI",
+    
+    "DO",
+    "DO#",
+    "RE",
+    "RE#",
+    "-"
   ],
 'abc': [
+    // "G,",
+    // "^G,",
+    // "A,",
+    // "^A,",
+    // "B,",
+
     "C",
-    "C#",
+    // "C#",
     "D",
-    "D#",
+    // "D#",
     "E",
     "F",
-    "F#",
+    // "F#",
     "G",
     "G#",
     "A",
     "A#",
-    "B"
+    "B",
+
+    "c",
+    "^c",
+
+    "d",
+    "^d",
+
+    "e",
+
+    "f",
+    "^f",
+
+    "g",
+    "^g",
+
+    "a",
+    "^a",
+
+    "b",
+
+    "c'",
+    "^c'",
+    "d'",
+    "^d'",
+    "z",
   ]
 };
-
-export const notePitch = {
-'C,':'',
-'^C,':'',
-'D,':'',
-'E,':'',
-'F,':'',
-'G,':'',
-'A,':'',
-'B,':'',
-'C':'DO',
-'D':'RE',
-'E':'MI',
-'F':'',
-'G':'',
-'A':'',
-'B':'',
-'c':'',
-'d':'',
-'e':'',
-'f':'',
-'g':'',
-'a':'',
-'b':''
-}
 
 
 
 export const notePitchAbcParse = {
-  'G,':'G3',
-  '^G,':'G3#',
+  'G,':'G4',
+  '^G,':'E3#',
   'A,':'A3',
-  '^A,':'A3#',
+  '^A,':'?',
   'B,':'B3',
   'C':'C4',
   '^C':'C4#',
-
   'D':'D4',
   '^D':'D4#',
   'E':'E4',
@@ -80,7 +118,6 @@ export const notePitchAbcParse = {
   '^F':'F4#',
   'G':'G4',
   '^G':'G4#',
-
   'A':'A4',
   '^A':'A4#',
   'B':'B4',
@@ -96,11 +133,15 @@ export const notePitchAbcParse = {
   '^g':'G5#',
   'a':'A5',
   '^a':'A5#',
+
+  'b':'B5',
+  "c'":'C6',
+  "d'":'D6',
+  "z":'-',
 }
 
 export const convertAbcNotation = (note: string) => {
-
-  const abcIndex = noteDictionary.abc.findIndex((abcNote) => abcNote === note)
   console.info(note)
+  const abcIndex = noteDictionary.abc.findIndex((abcNote) => abcNote === note)
   return noteDictionary.solfege[abcIndex];
 }

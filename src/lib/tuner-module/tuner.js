@@ -106,6 +106,7 @@ Tuner.prototype.startRecord = function () {
       
       if (freq.pitch) {
         const note = self.getNote(freq.pitch);
+        console.info('notepitch', note)
 
         self.onNoteDetected({
           name: self.noteStrings[note % 12],
