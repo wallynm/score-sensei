@@ -1,17 +1,20 @@
 export default `
 T:Asa Branca
+T:Piano
 C:Baião de dois
-M:2/4
+M:4 /4
 Q:1/4=118
-L:1/8
 K:G
+%%MIDI program 40
 %%staffwidth 400
-GA|]B2d2|d2B2|c2(c2|
-c2)GA|B2d2|d2c2|B4|zG GA
-B2d2|z d1 cB|G
-G|]B3d4|d5B6|c7c8|
-G, D2 A e4G,4 D4 A4 e4
+z 4   | GA       |] B2 d2 | d2 B2    | c2 c2 |
+z GA | B2 d2    | d2 c2  | B4       | zG GA  |
+B2 d2 | z d cB | G2 c2  | z c1 BA | A2 B2    |
+zA AG | G4       | zG GA | B2 d2     | z d cB|
+G2 c2 | z c1 BA | A2 B2  | zA AG    | G2 fd  |
+
 `
+
 
 
 
