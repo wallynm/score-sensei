@@ -1,5 +1,5 @@
 import { PitchDetector } from "pitchy";
-import { noteDictionary } from "$lib/noteDictionary";
+import { noteDictionary, noteStrings } from "$lib/noteDictionary";
 import { CONFIG_CLARITY_THRESHOLD, CONFIG_MINIMUM_DECIBEIS } from "./config";
 import { note } from "./note";
 
@@ -14,7 +14,7 @@ const Tuner = function ({
   this.middleA = a4 || 440;
   this.semitone = 69;
   this.bufferSize = 4096;
-  this.noteStrings = noteDictionary[this.notation];
+  this.noteStrings = noteStrings;
   this.notesMap = [];
   this.onNoteDetected = onNoteDetected;
 
@@ -106,6 +106,7 @@ Tuner.prototype.startRecord = function () {
       
       if (freq.pitch) {
         const note = self.getNote(freq.pitch);
+        console.info('notepitch', note)
 
         self.onNoteDetected({
           name: self.noteStrings[note % 12],
