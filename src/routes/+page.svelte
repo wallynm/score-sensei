@@ -402,7 +402,7 @@ onMount(async () => {
     Próxima: {score.notes[score.currentNotePositon] && getNoteByPosition(score.currentNotePositon+1).solfegeNotation }
   </div>
   <div>
-    Selected: {score.selectedNote && getNoteByPosition(score.selectedNote).solfegeNotation }
+    Selected: {score.selectedNote && getNoteByPosition(score.selectedNote)?.solfegeNotation }
   </div>
   
   
